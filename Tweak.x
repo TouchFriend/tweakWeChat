@@ -2,6 +2,7 @@
 
 #define NJUserDefaults [NSUserDefaults standardUserDefaults]
 #define NJAutoKey @"NJAutoKey"
+#define NJAssetPath(path) @"/Library/PreferenceLoader/Preferences/NJWeChat/" #path
 
 %hook FindFriendEntryViewController
 
@@ -26,32 +27,22 @@
     if (indexPath.section != [self numberOfSectionsInTableView:tableView] - 1) {
         return %orig;
     }
-    UITableViewCell *cell;
+    NSString *reuseIdentifier = indexPath.row == 0 ? @"autoRedPacketCellId" : @"exitCellId";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
+    if (!cell) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
+        cell.backgroundColor = [UIColor whiteColor];
+        cell.imageView.image = [UIImage imageWithContentsOfFile:NJAssetPath(skull.png)];
+    }
+    
     if (indexPath.row == 0) {
-        static NSString *autoReuseIdentifier = @"autoRedPacket";
-        cell = [tableView dequeueReusableCellWithIdentifier:autoReuseIdentifier];
-        if (!cell) {
-            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:autoReuseIdentifier];
-            cell.backgroundColor = [UIColor whiteColor];
-        }
         cell.textLabel.text = @"自动抢红包";
         UISwitch *autoSwitch = [[UISwitch alloc] init];
         cell.accessoryView = autoSwitch;
         autoSwitch.on = [NJUserDefaults boolForKey:NJAutoKey];
         [autoSwitch addTarget:self action:@selector(nj_autoChange:) forControlEvents:UIControlEventValueChanged];
-    }
-    if (indexPath.row == 1) {
-        static NSString *exitReuseIdentifier = @"exit";
-        cell = [tableView dequeueReusableCellWithIdentifier:exitReuseIdentifier];
-        if (!cell) {
-            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:exitReuseIdentifier];
-            cell.backgroundColor = [UIColor whiteColor];
-        }
+    } else if (indexPath.row == 1) {
         cell.textLabel.text = @"退出微信";
-    }
-    if (!cell) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"111"];
-        cell.backgroundColor = [UIColor whiteColor];
     }
     return cell;
 }
@@ -75,6 +66,7 @@
     }
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
+
 
 
 %end
