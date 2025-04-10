@@ -1,5 +1,8 @@
 #import <UIKit/UIKit.h>
 
+#define NJUserDefaults [NSUserDefaults standardUserDefaults]
+#define NJAutoKey @"NJAutoKey"
+
 %hook FindFriendEntryViewController
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -13,6 +16,12 @@
     return %orig;
 }
 
+// 保存开关
+%new
+- (void)nj_autoChange:(UISwitch *)autoSwitch {
+    [NJUserDefaults setBool:autoSwitch.isOn forKey:NJAutoKey];
+}
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.section != [self numberOfSectionsInTableView:tableView] - 1) {
         return %orig;
@@ -23,22 +32,27 @@
         cell = [tableView dequeueReusableCellWithIdentifier:autoReuseIdentifier];
         if (!cell) {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:autoReuseIdentifier];
+            cell.backgroundColor = [UIColor whiteColor];
         }
         cell.textLabel.text = @"自动抢红包";
-        cell.accessoryView = [[UISwitch alloc] init];
+        UISwitch *autoSwitch = [[UISwitch alloc] init];
+        cell.accessoryView = autoSwitch;
+        autoSwitch.on = [NJUserDefaults boolForKey:NJAutoKey];
+        [autoSwitch addTarget:self action:@selector(nj_autoChange:) forControlEvents:UIControlEventValueChanged];
     }
     if (indexPath.row == 1) {
         static NSString *exitReuseIdentifier = @"exit";
         cell = [tableView dequeueReusableCellWithIdentifier:exitReuseIdentifier];
         if (!cell) {
             cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:exitReuseIdentifier];
+            cell.backgroundColor = [UIColor whiteColor];
         }
         cell.textLabel.text = @"退出微信";
     }
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"111"];
+        cell.backgroundColor = [UIColor whiteColor];
     }
-    cell.backgroundColor = [UIColor whiteColor];
     return cell;
 }
 
