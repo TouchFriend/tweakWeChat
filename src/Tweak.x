@@ -1,8 +1,9 @@
 #import <UIKit/UIKit.h>
+#import "models/NJPerson.h"
 
 #define NJUserDefaults [NSUserDefaults standardUserDefaults]
 #define NJAutoKey @"NJAutoKey"
-#define NJAssetPath(path) @"/Library/PreferenceLoader/Preferences/NJWeChat/" #path
+#define NJAssetPath(path) @"/Library/Caches/NJWeChat/" #path
 
 %hook FindFriendEntryViewController
 
@@ -65,6 +66,9 @@
         return;
     }
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    NJPerson *person = [[NJPerson alloc] init];
+    person.age = 10;
+    NSLog(@"person age is %ld", person.age);
 }
 
 
